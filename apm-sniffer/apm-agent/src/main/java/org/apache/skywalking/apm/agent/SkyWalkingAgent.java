@@ -61,8 +61,14 @@ public class SkyWalkingAgent {
     /**
      * Main entrance. Use byte-buddy transform to enhance all classes, which define in plugins.
      *
-     * @param agentArgs
-     * @param instrumentation
+     * @param agentArgs       -javaagent 命令携带的参数。如：skywalking.agent.service_name 或 skywalking.collector.backend_service
+     * @param instrumentation java.lang.instrumen.Instrumentation 接口：提供了操作类定义的相关方法
+     * Instrumentation 接口：
+     *     addTransformer()/removeTransformer() 方法：注册/注销一个 ClassFileTransformer 类的实例，该 Transformer 会在类加载的时候被调用，可用于修改类定义。
+     *     redefineClasses() 方法：该方法针对的是已经加载的类，它会对传入的类进行重新定义。
+     *     **getAllLoadedClasses()方法：**返回当前 JVM 已加载的所有类。
+     *     getInitiatedClasses() 方法：返回当前 JVM 已经初始化的类。
+     *     getObjectSize()方法：获取参数指定的对象的大小。
      * @throws PluginException
      */
     public static void premain(String agentArgs, Instrumentation instrumentation) throws PluginException, IOException {
@@ -86,8 +92,10 @@ public class SkyWalkingAgent {
         final ByteBuddy byteBuddy = new ByteBuddy()
             .with(TypeValidation.of(Config.Agent.IS_OPEN_DEBUGGING_CLASS));
 
+        // Byte Buddy 会根据 Transformer 指定的规则进行拦截并增强代码
+        // Byte Buddy 专门有个 AgentBuilder 来处理 Java Agent 的场景
         AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy)
-            .ignore(
+            .ignore( // 忽略某些包名
                 nameStartsWith("net.bytebuddy.")
                     .or(nameStartsWith("org.slf4j."))
                     .or(nameStartsWith("org.groovy."))
@@ -113,9 +121,10 @@ public class SkyWalkingAgent {
             return;
         }
 
+        // 建造者模式（builder模式）
         agentBuilder
-            .type(pluginFinder.buildMatch())
-            .transform(new Transformer(pluginFinder))
+            .type(pluginFinder.buildMatch()) // 根据包名前缀拦截类
+            .transform(new Transformer(pluginFinder)) // 拦截到的类由 transformer 处理
             .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
             .with(new Listener())
             .installOn(instrumentation);

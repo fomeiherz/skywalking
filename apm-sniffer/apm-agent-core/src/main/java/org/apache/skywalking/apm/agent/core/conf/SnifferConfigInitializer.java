@@ -56,6 +56,7 @@ public class SnifferConfigInitializer {
         InputStreamReader configFileStream;
 
         try {
+            // 从配置文件 /config/agent.config 中提取参数
             configFileStream = loadConfig();
             Properties properties = new Properties();
             properties.load(configFileStream);
@@ -64,12 +65,14 @@ public class SnifferConfigInitializer {
                 //replace the key's value. properties.replace(key,value) in jdk8+
                 properties.put(key, PropertyPlaceholderHelper.INSTANCE.replacePlaceholders(value, properties));
             }
+            // 把配置值设置到 Config 类中
             ConfigInitializer.initialize(properties, Config.class);
         } catch (Exception e) {
             logger.error(e, "Failed to read the config file, skywalking is going to run in default config.");
         }
 
         try {
+            // 把配置项中 skywalking. 前缀删掉
             overrideConfigBySystemProp();
         } catch (Exception e) {
             logger.error(e, "Failed to read the system properties.");
@@ -85,13 +88,15 @@ public class SnifferConfigInitializer {
                 logger.error(e, "Failed to parse the agent options, val is {}.", agentOptions);
             }
         }
-
+        // 读取配置项：agent.service_name
         if (StringUtil.isEmpty(Config.Agent.SERVICE_NAME)) {
             throw new ExceptionInInitializerError("`agent.service_name` is missing.");
         }
+        // 读取配置项：collector.backend_service
         if (StringUtil.isEmpty(Config.Collector.BACKEND_SERVICE)) {
             throw new ExceptionInInitializerError("`collector.backend_service` is missing.");
         }
+        // 读取插件配置项
         if (Config.Plugin.PEER_MAX_LENGTH <= 3) {
             logger.warn("PEER_MAX_LENGTH configuration:{} error, the default value of 200 will be used.", Config.Plugin.PEER_MAX_LENGTH);
             Config.Plugin.PEER_MAX_LENGTH = 200;
@@ -175,7 +180,7 @@ public class SnifferConfigInitializer {
      * @return the config file {@link InputStream}, or null if not needEnhance.
      */
     private static InputStreamReader loadConfig() throws AgentPackageNotFoundException, ConfigNotFoundException, ConfigReadFailedException {
-
+        // 读取配置文件：/config/agent.config
         String specifiedConfigPath = System.getProperties().getProperty(SPECIFIED_CONFIG_PATH);
         File configFile = StringUtil.isEmpty(specifiedConfigPath) ? new File(AgentPackagePath.getPath(), DEFAULT_CONFIG_FILE_NAME) : new File(specifiedConfigPath);
 
