@@ -223,6 +223,7 @@ public class RunningRule {
         }
 
         public void add(Metrics metrics) {
+            // 取出当前桶
             long bucket = metrics.getTimeBucket();
 
             LocalDateTime timebucket = TIME_BUCKET_FORMATTER.parseLocalDateTime(bucket + "");
@@ -288,7 +289,10 @@ public class RunningRule {
 
                 switch (valueType) {
                     case LONG:
+                        // 实际值
+                        // 该 metrics 应该是 PercentMetrics 类型对象
                         long lvalue = ((LongValueHolder)metrics).getValue();
+                        // 配置阈值
                         long lexpected = RunningRule.this.threshold.getLongThreshold();
                         switch (op) {
                             case GREATER:

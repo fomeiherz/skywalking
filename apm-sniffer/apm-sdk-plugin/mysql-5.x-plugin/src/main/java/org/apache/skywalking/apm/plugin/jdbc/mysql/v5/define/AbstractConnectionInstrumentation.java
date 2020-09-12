@@ -26,8 +26,8 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsIn
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 import org.apache.skywalking.apm.plugin.jdbc.define.Constants;
 
-import static net.bytebuddy.matcher.ElementMatchers.named;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
+import static net.ddy.matcher.ElementMatchers.named;
+import static net.ddy.matcher.ElementMatchers.takesArguments;
 
 /**
  * {@link AbstractConnectionInstrumentation} intercepts the following methods that the class which extend

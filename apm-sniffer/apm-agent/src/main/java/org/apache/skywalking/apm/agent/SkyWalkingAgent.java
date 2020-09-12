@@ -89,9 +89,11 @@ public class SkyWalkingAgent {
             return;
         }
 
+        // If true, skywalking agent will save all instrumented classes files in `/debugging` folder.
         final ByteBuddy byteBuddy = new ByteBuddy()
             .with(TypeValidation.of(Config.Agent.IS_OPEN_DEBUGGING_CLASS));
 
+        // 
         // Byte Buddy 会根据 Transformer 指定的规则进行拦截并增强代码
         // Byte Buddy 专门有个 AgentBuilder 来处理 Java Agent 的场景
         AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy)
